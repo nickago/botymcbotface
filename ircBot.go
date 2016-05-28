@@ -13,14 +13,7 @@ const USERNAME string = "attila_the_bot"
 func main() {
     var connData [1024]byte
 
-    addr, err := net.ResolveTCPAddr("tcp", "chat.freenode.net:6667")
-    checkError(err)
-
-    conn, err := net.DialTCP("tcp", nil, addr)
-    checkError(err)
-
-    conn.Write([]byte(fmt.Sprintf("NICK %s\r\n", USERNAME)))
-    conn.Write([]byte(fmt.Sprintf("USER %s 0 * :(Here lies %s)\r\n", USERNAME, USERNAME)))
+    conn := InitializeConn()
 
     for {
         n, err := conn.Read(connData[0:])
@@ -68,12 +61,25 @@ func handleConnection(conn *net.TCPConn, dataString string) {
     }
 }
 
-func sendMessage(conn *net.TCPConn, target string, msg string) {
-    msgString := fmt.Sprintf(":%s PRIVMSG %s :%s\r\n", USERNAME, target, msg))
-    _, err = conn.Write([]byte(msgString)
-    return err;
+func sendMessage(conn *net.TCPConn, target string, msg string) error {
+    msgString := fmt.Sprintf(":%s PRIVMSG %s :%s\r\n", USERNAME, target, msg)
+    _, err := conn.Write([]byte(msgString))
+    return err
 }
 
-func handlePM error (conn *net.TCPConn, target string, cmd string) {
-    sendMessage(conn, sender, "This isn't the turing test")
+func handlePM(conn *net.TCPConn, target string, cmd string) {
+    sendMessage(conn, target, "This isn't the turing test")
+}
+
+func initializeConn() (*net.TCPConn) {
+    addr, err := net.ResolveTCPAddr("tcp", "chat.freenode.net:6667")
+    checkError(err)
+
+    conn, err := net.DialTCP("tcp", nil, addr)
+    checkError(err)
+
+    conn.Write([]byte(fmt.Sprintf("NICK %s\r\n", USERNAME)))
+    conn.Write([]byte(fmt.Sprintf("USER %s 0 * :(Here lies %s)\r\n", USERNAME, USERNAME)))
+
+    return conn
 }
